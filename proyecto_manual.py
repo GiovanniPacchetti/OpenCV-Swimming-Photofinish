@@ -6,7 +6,7 @@ import numpy as np
 # ============================================================================
 
 VIDEO_PATH = 'Proyecto/libre.mp4'
-NUM_CARRILES = 7
+NUM_CARRILES = 8
 DIRECCION_CARRERA = 'izquierda'
 
 DELAY_MS = 150
