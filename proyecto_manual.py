@@ -6,7 +6,7 @@ import numpy as np
 # ============================================================================
 
 VIDEO_PATH = 'Proyecto/libre.mp4'
-NUM_CARRILES = 8
+NUM_CARRILES = 7
 DIRECCION_CARRERA = 'izquierda'
 
 DELAY_MS = 150
@@ -22,7 +22,7 @@ SOLIDITY_MIN = 0.3
 
 # VALIDACIÓN
 MARGEN_LLEGADA = 50
-FRAMES_MINIMOS_VISIBLE = 10
+FRAMES_MINIMOS_VISIBLE = 10  # 35   libre/esplada =10 // mariposa1/mariposa2 = 35/30 (cambiar valor segun la distancia del final de la carrera)
 FRAMES_MAX_PERDIDO = 3
 
 MARGEN_EXCLUSION = 100
