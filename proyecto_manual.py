@@ -2,16 +2,16 @@ import cv2 as cv
 import numpy as np
 
 # ============================================================================
-# CONFIGURACIÓN INICIAL
+# CONFIGURACIN INICIAL
 # ============================================================================
 
-VIDEO_PATH = 'Proyecto/libre.mp4'
-NUM_CARRILES = 8
+VIDEO_PATH = 'Proyecto/mariposa1.mp4'
+NUM_CARRILES = 8  # En mariposa1.mp4 hay 7 carriles (8 lineas) // En el resto 8 carriles (9 lineas)
 DIRECCION_CARRERA = 'izquierda'
 
 DELAY_MS = 150
 
-# PARÁMETROS DE DETECCIÓN
+# PARAMETROS DE DETECCION
 AREA_MIN_NADADOR_LEJANO = 80
 AREA_MAX_NADADOR = 20000
 ASPECT_RATIO_MIN = 0.2
@@ -20,9 +20,9 @@ SOLIDITY_MIN_LEJANO = 0.10
 AREA_MIN_NADADOR = 300
 SOLIDITY_MIN = 0.3
 
-# VALIDACIÓN
+# VALIDACION
 MARGEN_LLEGADA = 50
-FRAMES_MINIMOS_VISIBLE = 10  # 35   libre/esplada =10 // mariposa1/mariposa2 = 35/30 (cambiar valor segun la distancia del final de la carrera)
+FRAMES_MINIMOS_VISIBLE = 10  # 35   libre/esplada =10 // mariposa1/mariposa2 = 35/30 (cambiamos valor segun la distancia del final de la carrera)
 FRAMES_MAX_PERDIDO = 3
 
 MARGEN_EXCLUSION = 100
@@ -31,24 +31,73 @@ MARGEN_EXCLUSION = 100
 # COORDENADAS HARDCODEADAS DE CARRILES
 # ============================================================================
 
-LINEAS_CARRILES_HARDCODED = [
-    (0, 52, 768, 34),      # Línea 1: ARRIBA
-    (0, 69, 768, 57),      # Línea 2
-    (0, 100, 768, 79),     # Línea 3
-    (0, 130, 768, 116),    # Línea 4
-    (0, 168, 768, 149),    # Línea 5
-    (0, 216, 768, 191),    # Línea 6
-    (0, 271, 768, 239),    # Línea 7
-    (0, 330, 768, 321),    # Línea 8
-    (0, 431, 768, 405),    # Línea 9: ABAJO
+LINEAS_LIBRE = [
+    (0, 52, 768, 34),      # Linea 1: ARRIBA
+    (0, 69, 768, 57),      # Linea 2
+    (0, 100, 768, 79),     # Linea 3
+    (0, 130, 768, 116),    # Linea 4
+    (0, 168, 768, 149),    # Linea 5
+    (0, 216, 768, 191),    # Linea 6
+    (0, 271, 768, 239),    # Linea 7
+    (0, 330, 768, 321),    # Linea 8
+    (0, 431, 768, 405),    # Linea 9: ABAJO
 ]
 
+LINEAS_ESPALDA = [
+    (0, 58, 768, 37),
+    (0, 85, 768, 53),
+    (0, 109, 768, 78),
+    (0, 141, 768, 107),
+    (0, 177, 768, 137),
+    (0, 217, 768, 178),
+    (0, 272, 768, 226),
+    (0, 341, 768, 285),
+    (0, 420, 768, 369),
+]
+
+LINEAS_BRAZA = [
+    (0, 48, 768, 31),
+    (0, 72, 768, 53),
+    (0, 98, 768, 78),
+    (0, 133, 768, 103),
+    (0, 170, 768, 134),
+    (0, 216, 768, 172),
+    (0, 262, 768, 232),
+    (0, 345, 768, 290),
+    (0, 429, 768, 370),
+]
+
+LINEAS_MARIPOSA1 = [     
+    (0, 82, 768, 53),      # Línea 1
+    (0, 110, 768, 77),     # Línea 2
+    (0, 138, 768, 104),    # Línea 3
+    (0, 176, 768, 136),    # Línea 4
+    (0, 218, 768, 175),    # Línea 5
+    (0, 271, 768, 225),    # Línea 6
+    (0, 339, 768, 286),    # Línea 7
+    (0, 431, 768, 369),    # Línea 8
+]
+
+LINEAS_MARIPOSA2 = [
+    (0, 39, 768, 13),
+    (0, 65, 768, 33),
+    (0, 90, 768, 53),
+    (0, 120, 768, 86),
+    (0, 159, 768, 118),
+    (0, 202, 768, 161),
+    (0, 261, 768, 211),
+    (0, 335, 768, 279),
+    (0, 425, 768, 368),
+]
+
+
+
 # ============================================================================
-# CLASE PARA MANEJAR CARRILES CON TRACKING DINÁMICO
+# CLASE PARA MANEJAR CARRILES CON TRACKING DINAMICO
 # ============================================================================
 
 class CarrilesInclinadosDinamicos:
-    """Carriles que se adaptan al movimiento de cámara"""
+    """Carriles que se adaptan al movimiento de camara"""
     
     def __init__(self, lineas, num_carriles=8):
         self.lineas = lineas
@@ -62,14 +111,14 @@ class CarrilesInclinadosDinamicos:
             criteria=(cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 10, 0.03)
         )
         
-        # Puntos de las líneas para optical flow
+        # Puntos de las lineas para optical flow
         self.puntos_lineas = self._crear_puntos_tracking()
         self.frame_anterior = None
     
     def _crear_puntos_tracking(self):
-        """Crear puntos en las líneas para tracking"""
+        """Crear puntos en las lineas para tracking"""
         puntos = []
-        num_puntos = 8  # Puntos por línea
+        num_puntos = 8  # Puntos por linea
         
         for linea in self.lineas:
             x1, y1, x2, y2 = linea
@@ -85,14 +134,14 @@ class CarrilesInclinadosDinamicos:
         return puntos
     
     def actualizar(self, frame):
-        """Actualizar posición de líneas usando optical flow"""
+        """Actualizar posicion de lineas usando optical flow"""
         frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         
         if self.frame_anterior is None:
             self.frame_anterior = frame_gray.copy()
             return
         
-        # Optical flow para cada línea
+        # Optical flow para cada linea
         for idx, puntos_linea in enumerate(self.puntos_lineas):
             try:
                 nuevos_puntos, status, err = cv.calcOpticalFlowPyrLK(
@@ -110,10 +159,10 @@ class CarrilesInclinadosDinamicos:
                         # Actualizar puntos
                         self.puntos_lineas[idx] = nuevos_puntos
                         
-                        # Recalcular línea con puntos tracked
+                        # Recalcular linea con puntos tracked
                         puntos_2d = nuevos_puntos.reshape(-1, 2)
                         
-                        # Ajustar línea con polinomio de grado 1
+                        # Ajustar linea con polinomio de grado 1
                         if len(puntos_2d) >= 2:
                             coefs = np.polyfit(puntos_2d[:, 0], puntos_2d[:, 1], 1)
                             m = coefs[0]
@@ -136,7 +185,7 @@ class CarrilesInclinadosDinamicos:
         self.frame_anterior = frame_gray.copy()
     
     def obtener_y_en_x(self, x, indice_carril):
-        """Obtiene Y en X usando línea actual"""
+        """Obtiene Y en X usando linea actual"""
         if indice_carril < 0 or indice_carril >= len(self.lineas_actuales):
             return 0
         
@@ -194,35 +243,47 @@ class CarrilesInclinadosDinamicos:
         return frame_viz
 
 # ============================================================================
-# SELECCIÓN DE CARRILES
+# SELECCION DE CARRILES
 # ============================================================================
 
 def seleccionar_carriles(frame, num_carriles=8, usar_hardcoded=None):
     if usar_hardcoded is None:
         print("\n" + "="*60)
-        print("SELECCIÓN DE CARRILES")
+        print("SELECCION DE CARRILES")
         print("="*60)
-        print("¿Qué deseas hacer?")
-        print("1. Usar coordenadas HARDCODEADAS (rápido)")
+        print("¿Que deseas hacer?")
+        print("1. Usar coordenadas HARDCODEADAS (rapido)")
         print("2. Seleccionar carriles MANUALMENTE (personalizado)")
         print("="*60)
         
         while True:
-            opcion = input("Elige opción (1 o 2): ").strip()
+            opcion = input("Elige opcion (1 o 2): ").strip()
             if opcion in ['1', '2']:
                 usar_hardcoded = (opcion == '1')
                 break
             else:
-                print("Opción inválida. Intenta de nuevo.")
+                print("Opcion invalida. Intenta de nuevo.")
     
     if usar_hardcoded:
         print("\n✓ Usando coordenadas HARDCODEADAS")
-        return LINEAS_CARRILES_HARDCODED
+        if NUM_CARRILES == 8:
+            if VIDEO_PATH.endswith('mariposa1.mp4'):
+                return LINEAS_MARIPOSA1
+            elif VIDEO_PATH.endswith('mariposa2.mp4'):
+                return LINEAS_MARIPOSA2
+            elif VIDEO_PATH.endswith('braza.mp4'):
+                return LINEAS_BRAZA
+            elif VIDEO_PATH.endswith('espalda.mp4'):
+                return LINEAS_ESPALDA
+            else:
+                return LINEAS_LIBRE
+        elif NUM_CARRILES == 7 and VIDEO_PATH.endswith('mariposa1.mp4'):
+            return LINEAS_MARIPOSA1
     else:
         print("\n" + "="*60)
-        print("SELECCIÓN MANUAL DE CARRILES")
+        print("SELECCION MANUAL DE CARRILES")
         print("="*60)
-        print(f"Necesitas hacer {num_carriles + 1} líneas:")
+        print(f"Necesitas hacer {num_carriles + 1} lineas:")
         print("- Para cada carril: haz 2 clics (arriba y abajo)")
         print("\nPresiona 'r' para reiniciar")
         print("Presiona ENTER cuando termines")
@@ -260,11 +321,11 @@ def seleccionar_carriles(frame, num_carriles=8, usar_hardcoded=None):
                     lineas.append((x_izq, y_izq, x_der, y_der))
                     
                     num_linea = len(lineas)
-                    print(f"✓ Línea {num_linea}: ({x_izq},{y_izq}) - ({x_der},{y_der})")
+                    print(f"✓ Linea {num_linea}: ({x_izq},{y_izq}) - ({x_der},{y_der})")
                     
                     puntos_actuales = []
                 
-                cv.putText(frame_copy, f"Líneas: {len(lineas)}/{num_carriles + 1}", 
+                cv.putText(frame_copy, f"Lineas: {len(lineas)}/{num_carriles + 1}", 
                           (10, frame.shape[0] - 20),
                           cv.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
                 
@@ -281,13 +342,13 @@ def seleccionar_carriles(frame, num_carriles=8, usar_hardcoded=None):
                     print(f"\n✓ Carriles confirmados!")
                     break
                 else:
-                    print(f"⚠️ Necesitas {num_carriles + 1} líneas")
+                    print(f"⚠️ Necesitas {num_carriles + 1} lineas")
             elif key == ord('r'):
                 lineas = []
                 puntos_actuales = []
                 frame_copy = frame.copy()
                 cv.imshow('Seleccionar Carriles', frame_copy)
-                print("Selección reiniciada")
+                print("Seleccion reiniciada")
         
         cv.destroyWindow('Seleccionar Carriles')
         return lineas
@@ -313,11 +374,11 @@ def crear_mascara_zona_valida_rapida(frame_shape, linea_meta, direccion='izquier
 
 def seleccionar_linea_meta_manual(frame):
     print("\n" + "="*60)
-    print("SELECCIÓN MANUAL DE LA LÍNEA DE META")
+    print("SELECCION MANUAL DE LA LiNEA DE META")
     print("="*60)
     print("Instrucciones:")
-    print("1. Haz clic en el PUNTO SUPERIOR de la línea de meta")
-    print("2. Haz clic en el PUNTO INFERIOR de la línea de meta")
+    print("1. Haz clic en el PUNTO SUPERIOR de la linea de meta")
+    print("2. Haz clic en el PUNTO INFERIOR de la linea de meta")
     print("3. Presiona 'r' para reiniciar")
     print("4. Presiona ENTER para confirmar")
     print("="*60 + "\n")
@@ -358,7 +419,7 @@ def seleccionar_linea_meta_manual(frame):
             puntos = []
             frame_copy = frame.copy()
             cv.imshow('Seleccionar Linea de Meta', frame_copy)
-            print("Selección reiniciada.")
+            print("Seleccion reiniciada.")
     
     cv.destroyWindow('Seleccionar Linea de Meta')
     
@@ -380,7 +441,7 @@ def seleccionar_linea_meta_manual(frame):
     
     linea_extendida = (int(x_top), int(y_top), int(x_bottom), int(y_bottom))
     
-    print(f"Línea de meta seleccionada: {linea_extendida}")
+    print(f"Linea de meta seleccionada: {linea_extendida}")
     
     return linea_extendida
 
@@ -473,12 +534,12 @@ class LineaMetaTracker:
 def crear_mascara_piscina(frame, manual=True):
     if manual:
         print("\n" + "="*60)
-        print("SELECCIÓN DE ÁREA DE LA PISCINA")
+        print("SELECCION DE AREA DE LA PISCINA")
         print("="*60)
         print("Instrucciones:")
         print("1. Haz clic en las ESQUINAS de la piscina en orden")
         print("2. Presiona ENTER cuando hayas terminado")
-        print("3. Presiona 'r' para reiniciar la selección")
+        print("3. Presiona 'r' para reiniciar la seleccion")
         print("="*60 + "\n")
         
         puntos = []
@@ -523,7 +584,7 @@ def crear_mascara_piscina(frame, manual=True):
         return mask
 
 # ============================================================================
-# TRACKING POR RECTÁNGULO ADAPTATIVO
+# TRACKING POR RECTANGULO ADAPTATIVO
 # ============================================================================
 
 class RectanguloNadador:
@@ -777,10 +838,10 @@ def procesar_video_natacion(video_path, direccion='izquierda', seleccionar_roi=T
     total_frames = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
     
     print(f"\n" + "="*60)
-    print("SISTEMA DE FOTOFINISH PARA NATACIÓN")
+    print("SISTEMA DE FOTOFINISH PARA NATACION")
     print("="*60)
     print(f"Video: {width}x{height}, {fps} FPS, {total_frames} frames")
-    print(f"Método: RECTÁNGULOS ADAPTATIVOS + TRACKING DINÁMICO DE CARRILES")
+    print(f"Metodo: RECTANGULOS ADAPTATIVOS + TRACKING DINAMICO DE CARRILES")
     print("="*60 + "\n")
     
     ret, first_frame = cap.read()
@@ -789,7 +850,7 @@ def procesar_video_natacion(video_path, direccion='izquierda', seleccionar_roi=T
         return
     
     lineas_carriles = seleccionar_carriles(first_frame, NUM_CARRILES)
-    # ✅ Usar clase dinámica
+    # ✅ Usar clase dinamica
     carriles_inclinados = CarrilesInclinadosDinamicos(lineas_carriles, NUM_CARRILES)
     
     linea_meta_inicial = seleccionar_linea_meta_manual(first_frame)
@@ -811,7 +872,7 @@ def procesar_video_natacion(video_path, direccion='izquierda', seleccionar_roi=T
         
         frame_num += 1
         
-        # ✅ ACTUALIZAR CARRILES CON TRACKING DINÁMICO
+        # ✅ ACTUALIZAR CARRILES CON TRACKING DINAMICO
         carriles_inclinados.actualizar(frame)
         
         linea_meta = linea_meta_tracker.actualizar(frame)
@@ -829,7 +890,7 @@ def procesar_video_natacion(video_path, direccion='izquierda', seleccionar_roi=T
             overlay[zona_excluida > 0] = [0, 0, 255]
             cv.addWeighted(overlay, 0.15, frame_vis, 0.85, 0, frame_vis)
         
-        # ✅ DIBUJAR CARRILES DINÁMICOS
+        # ✅ DIBUJAR CARRILES DINAMICOS
         frame_vis = carriles_inclinados.dibujar_carriles(frame_vis)
         
         x1, y1, x2, y2 = linea_meta
