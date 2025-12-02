@@ -15,7 +15,7 @@ El repositorio contiene los siguientes scripts principales:
     *   Puede ejecutarse directamente para procesar un video y visualizarlo en ventana.
     *   Ajustar las variables del principio del codigo dependiendo del video seleccionado
 
-*   **`video_making.py`** (o `grabar_video_modificado.py`):
+*   **`video_making.py`**:
     *   🎥 **Script de Grabación.** Utiliza las clases de `proyecto_manual.py` para procesar un video y generar un archivo `.mp4` de salida con una interfaz gráfica (barra lateral con clasificación).
     *   Incluye lógica de detección automática de estilo basada en el nombre del archivo.
 
