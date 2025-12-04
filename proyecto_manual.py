@@ -22,7 +22,7 @@ SOLIDITY_MIN = 0.3
 
 # VALIDACION
 MARGEN_LLEGADA = 50
-FRAMES_MINIMOS_VISIBLE = 10  # 35   libre/esplada =10 // mariposa1/mariposa2 = 35/30 (cambiamos valor segun la distancia del final de la carrera)
+FRAMES_MINIMOS_VISIBLE = 35  # 35   libre/esplada =10 // mariposa1/mariposa2 = 35/30 (cambiamos valor segun la distancia del final de la carrera)
 FRAMES_MAX_PERDIDO = 3
 
 MARGEN_EXCLUSION = 100
@@ -850,7 +850,7 @@ def procesar_video_natacion(video_path, direccion='izquierda', seleccionar_roi=T
         return
     
     lineas_carriles = seleccionar_carriles(first_frame, NUM_CARRILES)
-    # ✅ Usar clase dinamica
+    # Usar clase dinamica
     carriles_inclinados = CarrilesInclinadosDinamicos(lineas_carriles, NUM_CARRILES)
     
     linea_meta_inicial = seleccionar_linea_meta_manual(first_frame)
@@ -872,7 +872,7 @@ def procesar_video_natacion(video_path, direccion='izquierda', seleccionar_roi=T
         
         frame_num += 1
         
-        # ✅ ACTUALIZAR CARRILES CON TRACKING DINAMICO
+        # ACTUALIZAR CARRILES CON TRACKING DINAMICO
         carriles_inclinados.actualizar(frame)
         
         linea_meta = linea_meta_tracker.actualizar(frame)
@@ -890,7 +890,7 @@ def procesar_video_natacion(video_path, direccion='izquierda', seleccionar_roi=T
             overlay[zona_excluida > 0] = [0, 0, 255]
             cv.addWeighted(overlay, 0.15, frame_vis, 0.85, 0, frame_vis)
         
-        # ✅ DIBUJAR CARRILES DINAMICOS
+        # DIBUJAR CARRILES DINAMICOS
         frame_vis = carriles_inclinados.dibujar_carriles(frame_vis)
         
         x1, y1, x2, y2 = linea_meta
